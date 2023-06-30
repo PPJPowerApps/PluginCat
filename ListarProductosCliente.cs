@@ -43,10 +43,11 @@ namespace GestionProspecto
 
                     QueryExpression queryClienteProductosAux = new QueryExpression("cr8e5_clienteproducto")
                     {
-                        ColumnSet = new ColumnSet("cr8e5_productoaofrecer")
+                        ColumnSet = new ColumnSet("cr8e5_productoaofrecer", "cr8e5_estadooferta")
                     };
 
                     queryClienteProductosAux.Criteria.AddCondition("cr8e5_contact", ConditionOperator.Equal, clienteGuid);
+                    queryClienteProductosAux.Criteria.AddCondition("cr8e5_estadooferta", ConditionOperator.Between, 0, 1);
 
                     EntityCollection clienteProductosAux = service.RetrieveMultiple(queryClienteProductosAux);
 
@@ -62,7 +63,7 @@ namespace GestionProspecto
                         tracingService.Trace(item.Id.ToString());
                         var existe = productosOfrecidos.Any(x => x.Id.Equals(item.Id));
 
-                        if (!existe)
+                        if (!existe )
                         {
                             ofertasCliente.Entities.Add(item);
                             tracingService.Trace(existe.ToString());
