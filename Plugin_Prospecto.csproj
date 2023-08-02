@@ -89,9 +89,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsignarEjecutivo.cs" />
-    <Compile Include="AuxProductosOfrecidos.cs" />
+    <Compile Include="Plugins\PAsignarEjecutivo.cs" />
+    <Compile Include="Entities\AuxProductosOfrecidos.cs" />
     <Compile Include="IRetrieve.cs" />
+    <Compile Include="Plugins\PReasignarEjecutivo.cs" />
     <Compile Include="Services.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility.cs" />
