@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GestionProspecto")]
+[assembly: AssemblyTitle("Plugin_Prospecto")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("GestionProspecto")]
+[assembly: AssemblyProduct("Plugin_Prospecto")]
 [assembly: AssemblyCopyright("Copyright ©  2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7b939b8e-6e39-40d4-a976-76375935f358")]
+[assembly: Guid("4ed0389e-4a02-4e09-8ec2-271b67d0cd61")]
 
 // Version information for an assembly consists of the following four values:
 //
