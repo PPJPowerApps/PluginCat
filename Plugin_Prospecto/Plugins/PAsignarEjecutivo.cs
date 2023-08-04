@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using Plugin_Prospecto.Entities;
+using Plugin_Prospecto.Prospecto;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,11 +13,12 @@ using System.Threading.Tasks;
 
 namespace Plugin_Prospecto
 {
-    public class PAsignarEjecutivo : Services
+    public class PAsignarEjecutivo : Services, IPlugin
     {
-        public override void Execute(IServiceProvider serviceProvider)
+        // Asignar el ejecutivo que se hará cargo del prospecto en base al producto ofrecido
+        public void Execute(IServiceProvider serviceProvider)
         {
-
+            // Asignar el contexto de ejecución del plugin
             SetServices(serviceProvider);
             if (Context.InputParameters.Contains("Target") &&
                 Context.InputParameters["Target"] is Entity)
@@ -23,23 +26,37 @@ namespace Plugin_Prospecto
                 try
                 {
                     // Obtener la entidad target 
-                    Entity prospecto = (Entity)Context.InputParameters["Target"];
-                    EntityReference producto = (EntityReference)prospecto.Attributes["cr8e5_productoaofrecer"];
+                    var prospecto = (Entity)Context.InputParameters["Target"];
+                    var producto = (EntityReference)prospecto.Attributes[NombreEntidades.PRODUCTO];
 
-                    // Obtener el configurador del producto
-                    ColumnSet columnSet = new ColumnSet("cr8e5_ejecutivo", "cr8e5_contador");
-                    FilterExpression filterExpression = new FilterExpression();
-                    filterExpression.AddCondition("cr8e5_productoaofrecer", ConditionOperator.Equal, producto.Id);
-                    List<OrderExpression> orderExpressions = new List<OrderExpression>
+                    // Obtener el configurador del producto relacionado al prospecto
+                    var columnSet = new ColumnSet(NombreEntidades.EJECUTIVO, NombreEntidades.CONTADOR);
+                    var filterExpression = new FilterExpression();
+                    filterExpression.AddCondition(NombreEntidades.PRODUCTO, ConditionOperator.Equal, producto.Id);
+                    var orderExpressions = new List<OrderExpression>
                         {
-                            new OrderExpression("cr8e5_contador", OrderType.Ascending)
+                            new OrderExpression(NombreEntidades.CONTADOR, OrderType.Ascending)
                         };
-                    EntityCollection entityCollection = MultipleQuery("cr8e5_configuradordeproducto", columnSet, Service,filterExpression, orderExpressions);
+                    var entityCollection = MultipleQuery(NombreEntidades.CONFIGURADORPRODUCTO, columnSet, filterExpression, orderExpressions);
 
-
+                    // Actualizar el controlador producto y asignar el ejecutivo
                     if (entityCollection.Entities.Count > 0)
                     {
-                        UpdateControladorProspecto(entityCollection.Entities[0], prospecto, producto, 1);
+                        // Entidades de referencia para actualizar
+                        var entityRefCollection = new EntityReferenceCollection();
+                        
+                        // Inicializar IUpdater
+                        var updater = new UpdaterController(new UpdateEntity());
+
+                        // Actualizar contador de la entidad configurador producto
+                        var controladorProducto = entityCollection.Entities[0];
+                        Utility.UpdateCounter(ref controladorProducto, NombreEntidades.CONTADOR, 1);
+                        
+                        // Actualizar entidades
+                        updater.Execute(controladorProducto, Service);
+                        entityRefCollection.Add((EntityReference)controladorProducto[NombreEntidades.EJECUTIVO]);
+                        updater.Execute(prospecto, Service, entityRefCollection);
+
                     }
 
                 }

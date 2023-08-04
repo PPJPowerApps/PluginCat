@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using Plugin_Prospecto.Prospecto;
 
 namespace Plugin_Prospecto
 {
-    public abstract class Services : IPlugin, IRetrieve
+    public abstract class Services : IRetrieve
     {
         private ITracingService tracingService;
         private IPluginExecutionContext context;
@@ -19,8 +20,6 @@ namespace Plugin_Prospecto
         public IPluginExecutionContext Context { get => context; set => context = value; }
         public IOrganizationServiceFactory ServiceFactory { get => serviceFactory; set => serviceFactory = value; }
         public IOrganizationService Service { get => service; set => service = value; }
-
-        public abstract void Execute(IServiceProvider serviceProvider);
         public void SetServices(IServiceProvider serviceProvider)
         {
             TracingService = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
@@ -28,41 +27,17 @@ namespace Plugin_Prospecto
             ServiceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             Service = ServiceFactory.CreateOrganizationService(Context.UserId);
         }
-
-        public EntityCollection MultipleQuery(string entityName, ColumnSet columnSet, IOrganizationService Service, FilterExpression filterExpression = null, List<OrderExpression> orderExpressions = null)
+        public EntityCollection MultipleQuery(string entityName, ColumnSet columnSet, FilterExpression filterExpression = null, List<OrderExpression> orderExpressions = null)
         {
-            QueryExpression query = new QueryExpression(entityName)
+            var query = new QueryExpression(entityName)
             {
                 ColumnSet = columnSet,
-            };                
+            };
             if (filterExpression != null) { query.Criteria = filterExpression; }
-            if (orderExpressions != null)
-            {
-                foreach (var item in orderExpressions)
-                {
-                    query.AddOrder(item.AttributeName, item.OrderType);
-                    query.AddOrder(item.AttributeName, item.OrderType);
-                }
 
-            }
+            orderExpressions?.OrderBy(o => o.AttributeName).ThenBy(o => o.OrderType).ToList().ForEach(item => query.AddOrder(item.AttributeName, item.OrderType));
             EntityCollection entityCollection = Service.RetrieveMultiple(query);
             return entityCollection;
-        }
-        public void UpdateControladorProspecto(Entity controlador, Entity prospecto, EntityReference producto, int value)
-        {
-            Utility.UpdateCounter(ref controlador, "cr8e5_contador", value);
-
-            EntityReference ejecutivo = (EntityReference)controlador.Attributes["cr8e5_ejecutivo"];
-
-            Entity auxProspecto = new Entity("cr8e5_prospecto")
-            {
-                Id = prospecto.Id,
-            };
-            auxProspecto.Attributes["cr8e5_ejecutivo"] = ejecutivo;
-
-            Service.Update(auxProspecto);
-            Service.Update(controlador);
-
         }
     }
 }

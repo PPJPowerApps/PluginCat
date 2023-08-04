@@ -16,10 +16,10 @@ namespace CustomApi_Prospecto.CustomAPI
             SetServices(serviceProvider);
 
             // Parametros de entrada
+
             EntityReference prospecto = (EntityReference)Context.InputParameters["entity"];
             EntityReference producto = (EntityReference)Context.InputParameters["proAttr"];
 
-            TracingService.Trace(producto.Id.ToString() + prospecto.Id.ToString());
 
             // Parametro de respuesta
             bool response = false;
@@ -28,11 +28,11 @@ namespace CustomApi_Prospecto.CustomAPI
             {
                 try
                 {
-                    ColumnSet cs = new ColumnSet("cr8e5_productoaofrecer");
+                    ColumnSet cs = new ColumnSet(producto.LogicalName);
 
                     FilterExpression fe = new FilterExpression();
-                    fe.AddCondition("cr8e5_prospecto", ConditionOperator.Equal, prospecto.Id);
-                    fe.AddCondition("cr8e5_productoaofrecer", ConditionOperator.Equal, producto.Id);
+                    fe.AddCondition(prospecto.LogicalName, ConditionOperator.Equal, prospecto.Id);
+                    fe.AddCondition(producto.LogicalName, ConditionOperator.Equal, producto.Id);
 
                     EntityCollection cantidadProductosOfrecidos = MultipleQuery("cr8e5_auxproductosofrecidos", cs, Service, fe);
 

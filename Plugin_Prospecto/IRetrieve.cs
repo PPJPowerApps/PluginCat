@@ -10,6 +10,6 @@ namespace Plugin_Prospecto
 {
     internal interface IRetrieve
     {
-        EntityCollection MultipleQuery(string entityName, ColumnSet columnSet, IOrganizationService Service, FilterExpression filterExpression = null, List<OrderExpression> orderExpressions = null);
+        EntityCollection MultipleQuery(string entityName, ColumnSet columnSet, FilterExpression filterExpression = null, List<OrderExpression> orderExpressions = null);
     }
 }
