@@ -24,7 +24,7 @@ namespace Plugin_Prospecto
 
             var auxProductos = new Entity(NombreEntidades.AUXPRODUCTOSOFRECIDOS);
             auxProductos.Attributes[NombreEntidades.PROSPECTO] = new EntityReference(NombreEntidades.PROSPECTO, prospecto.Id);
-            auxProductos.Attributes["cr8e5_productoaofrecer"] = producto;
+            auxProductos.Attributes[NombreEntidades.PRODUCTO] = producto;
 
             return auxProductos;
         }
