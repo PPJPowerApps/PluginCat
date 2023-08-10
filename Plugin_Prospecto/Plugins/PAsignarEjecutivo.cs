@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using Plugin_Prospecto.Ejecutivo;
 using Plugin_Prospecto.Entities;
-using Plugin_Prospecto.Prospecto;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,33 +30,16 @@ namespace Plugin_Prospecto
                     var producto = (EntityReference)prospecto.Attributes[NombreEntidades.PRODUCTO];
 
                     // Obtener el configurador del producto relacionado al prospecto
-                    var columnSet = new ColumnSet(NombreEntidades.EJECUTIVO, NombreEntidades.CONTADOR);
-                    var filterExpression = new FilterExpression();
-                    filterExpression.AddCondition(NombreEntidades.PRODUCTO, ConditionOperator.Equal, producto.Id);
-                    var orderExpressions = new List<OrderExpression>
-                        {
-                            new OrderExpression(NombreEntidades.CONTADOR, OrderType.Ascending)
-                        };
-                    var entityCollection = MultipleQuery(NombreEntidades.CONFIGURADORPRODUCTO, columnSet, filterExpression, orderExpressions);
+                    var strategy = new AssignStrategy(new AssignEjecutiveFewestProducts());
+                    var configuradorProducto = strategy.Execute(prospecto, Service);
 
                     // Actualizar el controlador producto y asignar el ejecutivo
-                    if (entityCollection.Entities.Count > 0)
+                    if (configuradorProducto != null)
                     {
                         // Entidades de referencia para actualizar
-                        var entityRefCollection = new EntityReferenceCollection();
-                        
-                        // Inicializar IUpdater
-                        var updater = new UpdaterController(new UpdateEntity());
-
-                        // Actualizar contador de la entidad configurador producto
-                        var controladorProducto = entityCollection.Entities[0];
-                        Utility.UpdateCounter(ref controladorProducto, NombreEntidades.CONTADOR, 1);
-                        
-                        // Actualizar entidades
-                        updater.Execute(controladorProducto, Service);
-                        entityRefCollection.Add((EntityReference)controladorProducto[NombreEntidades.EJECUTIVO]);
-                        updater.Execute(prospecto, Service, entityRefCollection);
-
+                        Service.Update(configuradorProducto);
+                        Service.Update(CreateAuxProspecto(prospecto, configuradorProducto));
+                        Service.Create(Utility.CreateAuxProducto(prospecto));
                     }
 
                 }
@@ -66,6 +49,17 @@ namespace Plugin_Prospecto
                     throw;
                 }
             }
+        }
+        // Crear un prospecto auxiliar con un solo valor, ejecutivo
+        private Entity CreateAuxProspecto(Entity prospecto, Entity configuradorProducto)
+        {
+            Entity auxProspecto = new Entity(prospecto.LogicalName)
+            {
+                Id = prospecto.Id
+            };
+            // Asginar el ejecutivo desde el configurador de producto
+            auxProspecto.Attributes[NombreEntidades.EJECUTIVO] = (EntityReference)configuradorProducto.Attributes[NombreEntidades.EJECUTIVO];
+            return auxProspecto;
         }
     }
 }

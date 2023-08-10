@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using Plugin_Prospecto.Ejecutivo;
 using Plugin_Prospecto.Entities;
-using Plugin_Prospecto.Prospecto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,41 +30,24 @@ namespace Plugin_Prospecto
                     var preProducto = (EntityReference)preProspecto.Attributes[NombreEntidades.PRODUCTO];
                     var preEjecutivo = (EntityReference)preProspecto.Attributes[NombreEntidades.EJECUTIVO];
 
-                    // Obtener el configurador del producto nuevo
-                    var columnSet = new ColumnSet(NombreEntidades.EJECUTIVO, NombreEntidades.CONTADOR);
-                    var filterExpression = new FilterExpression();
-                    filterExpression.AddCondition(NombreEntidades.PRODUCTO, ConditionOperator.Equal, postProducto.Id);
-                    var orderExpressions = new List<OrderExpression>
-                    {
-                        new OrderExpression(NombreEntidades.CONTADOR, OrderType.Ascending)
-                    };
-                    var entityCollection = MultipleQuery(NombreEntidades.CONFIGURADORPRODUCTO, columnSet, filterExpression, orderExpressions);
+                    // Obtener el ejecutivo con menos productos asignados
+                    var strategy = new AssignStrategy(new AssignEjecutiveFewestProducts());
+                    var configuradorProducto = strategy.Execute(postProspecto, Service);
 
-                    var updater = new UpdaterController(new UpdateEntity());
                     // Actualizar el controlador producto y asignar el ejecutivo
-                    if (entityCollection.Entities.Count > 0)
+                    if (configuradorProducto != null)
                     {
-                        var entityRefCollection = new EntityReferenceCollection();
 
-                        var controladorProducto = entityCollection.Entities[0];
-                        Utility.UpdateCounter(ref controladorProducto, NombreEntidades.CONTADOR, 1);
-                        updater.Execute(controladorProducto, Service);
-
-                        entityRefCollection.Add((EntityReference)controladorProducto[NombreEntidades.EJECUTIVO]);
-                        updater.Execute(postProspecto, Service, entityRefCollection);
-
+                        Service.Update(configuradorProducto);
+                        Service.Update(CreateAuxProspecto(postProspecto, configuradorProducto));
+                        Service.Create(Utility.CreateAuxProducto(postProspecto));
                     }
 
-                    // Obtener el configurador del producto antiguo
-                    filterExpression = new FilterExpression();
-                    filterExpression.AddCondition(NombreEntidades.EJECUTIVO, ConditionOperator.Equal, preEjecutivo.Id);
-                    filterExpression.AddCondition(NombreEntidades.PRODUCTO, ConditionOperator.Equal, preProducto.Id);
-                    entityCollection = MultipleQuery(NombreEntidades.CONFIGURADORPRODUCTO, columnSet, filterExpression);
 
                     // Actualizar el controlador producto antiguo y recudir el contador de ejecutivo en 1
-                    var auxConfiguradorProducto = entityCollection.Entities[0];
-                    Utility.UpdateCounter(ref auxConfiguradorProducto, NombreEntidades.CONTADOR, -1);
-                    updater.Execute(auxConfiguradorProducto, Service);
+                    strategy.ChangeStrategy(new UnassignEjecutive());
+                    var auxConfiguradorProducto = strategy.Execute(preProspecto, Service);
+                    Service.Update(auxConfiguradorProducto);
 
                 }
                 catch (Exception ex)
@@ -74,6 +57,17 @@ namespace Plugin_Prospecto
                 }
 
             }
+        }
+        // Crear un prospecto auxiliar con un solo valor, ejecutivo
+        private Entity CreateAuxProspecto(Entity prospecto, Entity configuradorProducto)
+        {
+            Entity auxProspecto = new Entity(prospecto.LogicalName)
+            {
+                Id = prospecto.Id
+            };
+            // Asginar el ejecutivo desde el configurador de producto
+            auxProspecto.Attributes[NombreEntidades.EJECUTIVO] = (EntityReference)configuradorProducto.Attributes[NombreEntidades.EJECUTIVO];
+            return auxProspecto;
         }
     }
 }

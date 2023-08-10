@@ -89,16 +89,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\ControladorProducto.cs" />
+    <Compile Include="Ejecutivo\AssignEjecutiveFewestProducts.cs" />
+    <Compile Include="Ejecutivo\AssignStrategy.cs" />
+    <Compile Include="Ejecutivo\IAssign.cs" />
+    <Compile Include="Ejecutivo\UnassignEjecutive.cs" />
     <Compile Include="Entities\NombreEntidades.cs" />
-    <Compile Include="Entities\Prospecto.cs" />
-    <Compile Include="IRetrieve.cs" />
+    <Compile Include="Retrieve\RetrieveMultiple.cs" />
     <Compile Include="Plugins\PAsignarEjecutivo.cs" />
-    <Compile Include="Entities\AuxProductosOfrecidos.cs" />
     <Compile Include="Plugins\PReasignarEjecutivo.cs" />
-    <Compile Include="CRUD\Updater\IUpdate.cs" />
-    <Compile Include="CRUD\Updater\UpdaterController.cs" />
-    <Compile Include="CRUD\Updater\UpdateEntity.cs" />
     <Compile Include="Services.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility.cs" />
