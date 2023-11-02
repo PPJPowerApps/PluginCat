@@ -37,12 +37,10 @@ namespace Plugin_Prospecto
                     // Actualizar el controlador producto y asignar el ejecutivo
                     if (configuradorProducto != null)
                     {
-
                         Service.Update(configuradorProducto);
                         Service.Update(CreateAuxProspecto(postProspecto, configuradorProducto));
                         Service.Create(Utility.CreateAuxProducto(postProspecto));
                     }
-
 
                     // Actualizar el controlador producto antiguo y recudir el contador de ejecutivo en 1
                     strategy.ChangeStrategy(new UnassignEjecutive());
@@ -53,7 +51,6 @@ namespace Plugin_Prospecto
                 catch (Exception ex)
                 {
                     TracingService.Trace("Error of Plugin: {0}", ex.ToString());
-                    throw;
                 }
 
             }

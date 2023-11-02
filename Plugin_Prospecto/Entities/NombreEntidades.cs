@@ -31,7 +31,7 @@ namespace Plugin_Prospecto.Entities
         #region AuxProductosOfrecidos
         // Entity name
         public const string AUXPRODUCTOSOFRECIDOS = "cr8e5_auxproductosofrecidos";
-        public const string CONTADOR = "cr8e5_contador";
+        public const string CONTADOR = "cr8e5_countertest";
         
         #endregion
 

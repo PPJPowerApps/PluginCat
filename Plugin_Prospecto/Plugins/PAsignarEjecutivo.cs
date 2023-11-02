@@ -37,16 +37,15 @@ namespace Plugin_Prospecto
                     if (configuradorProducto != null)
                     {
                         // Entidades de referencia para actualizar
-                        Service.Update(configuradorProducto);
                         Service.Update(CreateAuxProspecto(prospecto, configuradorProducto));
+                        UpdateCounter.RollUpCounter(configuradorProducto.Id, Service);
                         Service.Create(Utility.CreateAuxProducto(prospecto));
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    TracingService.Trace("Error of Plugin: {0}", ex.ToString());
-                    throw;
+                    TracingService.Trace("Error of Plugin: {0}", ex.ToString());                    
                 }
             }
         }
@@ -57,8 +56,9 @@ namespace Plugin_Prospecto
             {
                 Id = prospecto.Id
             };
+            var configReference = new EntityReference(configuradorProducto.LogicalName, configuradorProducto.Id);
             // Asginar el ejecutivo desde el configurador de producto
-            auxProspecto.Attributes[NombreEntidades.EJECUTIVO] = (EntityReference)configuradorProducto.Attributes[NombreEntidades.EJECUTIVO];
+            auxProspecto.Attributes[NombreEntidades.CONFIGURADORPRODUCTO] = configReference;
             return auxProspecto;
         }
     }

@@ -34,7 +34,7 @@ namespace Plugin_Prospecto.Ejecutivo
             var configuradorProducto = entityCollection.Entities?.First();                  
             
             // Retornar el configurador de producto con el contador aumentado en 1
-            return Utility.CreateAuxConfigurador(configuradorProducto, 1);
+            return configuradorProducto;
 
         }
 
